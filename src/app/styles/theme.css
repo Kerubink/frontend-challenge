@@ -1,0 +1,117 @@
+/*
+ * Tema de cores — fonte: DESIGN_TOKENS.md (Figma cDNM5NzXNHMy9eLmqcSR2g).
+ * Somente cores. Tipografia, espaçamento e componentes ficam para etapas seguintes.
+ * Tailwind v4: tokens expostos via @theme inline (sem tailwind.config.ts).
+ * O layout do Figma é exclusivamente escuro: não há modo claro nem seletor .dark.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* ── Paleta Figma (valores exatos) ─────────────────────────────── */
+  --ink: #140d0a;
+  --surface-card: #241612;
+  --surface-dark: #38220f;
+  --surface-raised: #2f1d15;
+  --brand-primary: #d28a4c;
+  --text-accent: #e89b55;
+  --brand-secondary: #b39463;
+  --text-secondary: #cfb28c;
+  --text-foreground: #f5f1eb;
+  --border-default: #3f2319;
+  --border-soft: #55321f;
+  --text-coral: #f0805f;
+
+  /* ── Estados derivados (NÃO desenhados no Figma — decisão do projeto) ──
+   * Ajustar aqui se o design definir valores oficiais. */
+  --primary-hover: color-mix(in srgb, var(--brand-primary) 88%, white);
+  --primary-active: color-mix(in srgb, var(--brand-primary) 80%, black);
+  --surface-card-hover: var(--surface-raised);
+  --disabled-opacity: 0.4;
+
+  /* ── Variáveis shadcn/ui ───────────────────────────────────────── */
+  --background: var(--ink);
+  --foreground: var(--text-foreground);
+
+  --card: var(--surface-card);
+  --card-foreground: var(--text-foreground);
+
+  --popover: var(--surface-card);
+  --popover-foreground: var(--text-foreground);
+
+  --primary: var(--brand-primary);
+  --primary-foreground: var(--ink);
+
+  --secondary: var(--surface-raised);
+  --secondary-foreground: var(--text-foreground);
+
+  --muted: var(--surface-dark);
+  --muted-foreground: var(--brand-secondary);
+
+  --accent: var(--surface-raised);
+  --accent-foreground: var(--text-accent);
+
+  --destructive: var(--text-coral);
+  --destructive-foreground: var(--ink);
+
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--text-accent);
+
+  /* Sidebar (shadcn) — Account Sidebar do Perfil usa surface-card */
+  --sidebar: var(--surface-card);
+  --sidebar-foreground: var(--text-foreground);
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: var(--surface-raised);
+  --sidebar-accent-foreground: var(--text-accent);
+  --sidebar-border: var(--border-default);
+  --sidebar-ring: var(--text-accent);
+}
+
+@theme inline {
+  /* shadcn/ui */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Paleta Figma (utilitários: bg-ink, text-text-accent, border-border-soft…) */
+  --color-ink: var(--ink);
+  --color-surface-card: var(--surface-card);
+  --color-surface-dark: var(--surface-dark);
+  --color-surface-raised: var(--surface-raised);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-text-accent: var(--text-accent);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-coral: var(--text-coral);
+  --color-border-soft: var(--border-soft);
+
+  /* Estados derivados */
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-surface-card-hover: var(--surface-card-hover);
+}

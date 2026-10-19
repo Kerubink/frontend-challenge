@@ -9,6 +9,7 @@ import { Skeleton } from '@/shared/ui/shadcn/skeleton'
 import { Card } from '@/shared/ui/shadcn/card'
 import { Alert } from '@/shared/ui/Alert'
 import { NftArt } from '@/shared/ui/NftArt'
+import heroImage from '@/assets/images/hero.webp'
 import { errorMessage } from '@/shared/infrastructure/http/client'
 import { useFeaturedNfts, useNfts } from '../../application/queries'
 import { NftCard, NftCardSkeleton } from '../components/NftCard'
@@ -59,15 +60,7 @@ export function HomePage() {
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-3" aria-label="NFTs em destaque">
-          {featured.isPending
-            ? Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="aspect-square" />)
-            : featured.data?.slice(0, 3).map((n) => (
-                <Link key={n.id} to="/nfts/$nftId" params={{ nftId: n.id }} className="aspect-square overflow-hidden rounded-xl focus-visible:ring-2 focus-visible:ring-ring">
-                  <NftArt seed={n.seed} alt={`Destaque: ${n.name}`} />
-                </Link>
-              ))}
-        </div>
+        <img src={heroImage} alt="Coleção de NFTs em destaque da Kurio" width={900} height={900} fetchPriority="high" className="aspect-square w-full rounded-xl object-cover" />
       </section>
 
       <section aria-labelledby="destaques">

@@ -6,6 +6,7 @@ import { Button } from '@/shared/ui/shadcn/button'
 import { Badge } from '@/shared/ui/shadcn/badge'
 import { useLogout, useSession, sessionQuery } from '@/modules/identity/application/queries'
 import { useCart } from '@/modules/cart/application/queries'
+import { useRealtimeSync } from '@/modules/realtime/presentation/hooks/useRealtimeSync'
 import { SESSION_EXPIRED_EVENT } from '@/shared/infrastructure/http/client'
 import { env } from '@/shared/config/env'
 import { SCENARIOS } from '@/mocks/scenarios'
@@ -73,12 +74,15 @@ function Header() {
   )
 }
 
-function Footer() {
+function Footer({ realtimeConnected }: { realtimeConnected: boolean }) {
   return (
     <footer className="mt-16 border-t bg-card">
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-8 text-sm text-text-secondary md:px-8">
         <p className="font-bold tracking-widest text-foreground">KURIO</p>
         <p>© 2026 Kurio. Propriedade digital para todos.</p>
+        <p role="status" className="text-xs">
+          Tempo real: {realtimeConnected ? 'conectado' : 'reconectando…'}
+        </p>
         {env.enableMocks && (
           <p className="text-xs text-muted-foreground">
             Ambiente de demonstração (dados simulados com MSW). Cenários:{' '}
@@ -101,6 +105,8 @@ export function RootLayout() {
   const qc = useQueryClient()
   const navigate = useNavigate()
   const location = useLocation()
+  const { data: user } = useSession()
+  const realtimeConnected = useRealtimeSync(user?.id ?? 'guest')
 
   // Sessão expirada em qualquer chamada: limpa dados privados e leva ao login preservando o contexto.
   useEffect(() => {
@@ -122,7 +128,7 @@ export function RootLayout() {
       <main id="conteudo" className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 md:px-8">
         <Outlet />
       </main>
-      <Footer />
+      <Footer realtimeConnected={realtimeConnected} />
     </div>
   )
 }

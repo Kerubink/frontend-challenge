@@ -14,7 +14,8 @@ Build tool, organização e libs complementares são livres. Deploy público obr
 
 - `npm run dev` — Vite com mocks MSW (porta 5173). `?scenario=slow|empty|server-error|payment-declined|default` troca o cenário; `?reset=1` restaura o banco.
 - `npm run build` / `npm run preview` / `npm run typecheck`.
-- Ainda não existem: lint, Playwright e Lighthouse (obrigatórios pelo README).
+- `npm run test:e2e` — Playwright (Chromium, projetos desktop e mobile; sobe o `dev` com mocks). Hoje cobre só a cotação desatualizada no Checkout (`tests/e2e/flows/checkout-stale-quote.spec.ts`).
+- Ainda não existem: lint e Lighthouse (obrigatórios pelo README).
 
 Credenciais fictícias: `ana@kurio.dev` e `bruno@kurio.dev`, senha `Senha@123`. Cupons: `KURIO10`, `BEMVINDO5`, `EXPIRADO` (expirado).
 
@@ -114,3 +115,9 @@ Código, lockfile, assets, mocks, fixtures, testes e configs de auditoria. `READ
 
 - Responder e documentar em português (pt-BR), código e identificadores em inglês.
 - Commits pequenos e descritivos; não commitar sem pedido explícito.
+
+## Glossário (linguagem ubíqua — fonte: `GLOSSARIO.md`)
+
+- **Catálogo** (`src/modules/catalog/`): **NFT** (item colecionável à venda), **Edição** (tiragem ainda comprável; esgotada = indisponível), **Filtro** (critério na URL que reinicia a paginação).
+- **Checkout** (`src/modules/checkout/`): **Cotação** (valores calculados pela API; referência para fechar o pedido), **Pedido** (pendente/confirmado/recusado; terminais os dois últimos), **Recibo** (retrato imutável do pedido).
+- **Preço** muda de sentido: no Catálogo é o valor anunciado (vivo, muda por `nft.updated`); no Checkout é o valor cotado e aceito (congelado; no Recibo nunca muda). Não compartilhe um tipo `Price` entre contextos.

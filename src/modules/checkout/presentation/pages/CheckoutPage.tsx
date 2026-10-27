@@ -18,6 +18,7 @@ import { useWallets } from '@/modules/wallets/application/queries'
 import { useCreateOrder } from '@/modules/orders/application/queries'
 import { useQueryClient } from '@tanstack/react-query'
 import type { Cart } from '@/modules/cart/domain/types'
+import { useQuoteAcceptance } from '../../application/use-cases/quote-acceptance'
 
 type Step = 'form' | 'review'
 
@@ -37,12 +38,10 @@ export function CheckoutPage() {
   const [connected, setConnected] = useState(false)
   const [connecting, setConnecting] = useState(false)
   const [connectMsg, setConnectMsg] = useState<string | null>(null)
-  const [reviewedTotal, setReviewedTotal] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-  const [notice, setNotice] = useState<string | null>(null)
+  const quote = useQuoteAcceptance(cart)
 
   const wallet = wallets?.find((w) => w.id === walletId)
-  const stale = step === 'review' && cart && reviewedTotal !== null && cart.totalEth !== reviewedTotal
 
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) => setForm((f) => ({ ...f, [k]: e.target.value }))
 
@@ -61,9 +60,7 @@ export function CheckoutPage() {
     e.preventDefault()
     const errs = validate()
     setFieldErrors(errs)
-    if (Object.keys(errs).length || !cart) return
-    setNotice(null)
-    setReviewedTotal(cart.totalEth)
+    if (Object.keys(errs).length || !cart || quote.stale) return
     setStep('review')
   }
 
@@ -84,21 +81,19 @@ export function CheckoutPage() {
   }
 
   const confirm = () => {
-    if (!cart || !wallet || createOrder.isPending) return
+    // Nunca fecha o pedido com cotação não aceita: o total enviado é o da cotação aceita.
+    if (!cart || !wallet || !quote.accepted || quote.stale || createOrder.isPending) return
     createOrder.mutate(
-      { walletId: wallet.id, network, profile: { displayName: form.displayName, username: form.username, email: form.email, note: form.note || undefined }, expectedTotalEth: reviewedTotal ?? cart.totalEth },
+      { walletId: wallet.id, network, profile: { displayName: form.displayName, username: form.username, email: form.email, note: form.note || undefined }, expectedTotalEth: quote.accepted.totalEth },
       {
         onSuccess: (order) => navigate({ to: '/orders/$orderId', params: { orderId: order.id }, replace: true }),
         onError: (err) => {
           const e = apiError(err)
           const body = e.body as { code?: string; cart?: Cart; message?: string; fields?: Record<string, string> }
+          // A cotação da API atualiza o resumo; a diferença para a aceita exige nova confirmação.
           if (body.cart) qc.setQueryData(cartKey, body.cart)
-          if (body.code === 'QUOTE_CHANGED' || body.code === 'OUT_OF_STOCK') {
-            // Mudanças exigem nova confirmação do usuário.
-            setStep('review')
-            setReviewedTotal(body.cart?.totalEth ?? null)
-            setNotice(`${body.message ?? 'Os valores mudaram.'} Revise o resumo atualizado e confirme novamente.`)
-          } else if (body.fields) {
+          if (body.code === 'QUOTE_CHANGED' || body.code === 'OUT_OF_STOCK') setStep('review')
+          else if (body.fields) {
             setFieldErrors(body.fields)
             setStep('form')
           }
@@ -131,6 +126,17 @@ export function CheckoutPage() {
         <nav aria-label="Você está em" className="text-sm font-bold">Início / Mercado / Pagamento</nav>
         <h1 className="text-2xl font-bold">Pagamento</h1>
       </div>
+
+      {quote.stale && (
+        <Alert tone="error" data-testid="quote-change-notice" className="flex flex-col items-start gap-2">
+          <p className="font-bold">Os valores do seu pedido mudaram.</p>
+          <ul className="list-disc pl-5">
+            {quote.changes.map((c) => <li key={c}>{c}</li>)}
+          </ul>
+          <p>Revise o resumo atualizado e aceite o novo total para continuar.</p>
+          <Button type="button" size="sm" onClick={quote.acceptLatest}>Aceitar novo total</Button>
+        </Alert>
+      )}
 
       <div className="grid items-start gap-8 lg:grid-cols-[1fr_26rem]">
         {step === 'form' ? (
@@ -186,8 +192,7 @@ export function CheckoutPage() {
         ) : (
           <section aria-labelledby="revisao" className="flex flex-col gap-4">
             <h2 id="revisao" className="font-bold">Revise seu pedido</h2>
-            {(notice || stale) && <Alert tone="error">{notice ?? 'Os valores do carrinho mudaram desde a revisão.'} {stale && 'Revise o resumo atualizado e confirme novamente.'}</Alert>}
-            {createOrder.isError && !notice && <Alert tone="error">{errorMessage(createOrder.error)} Você pode tentar novamente: o pedido não será duplicado.</Alert>}
+            {createOrder.isError && !quote.stale && <Alert tone="error">{errorMessage(createOrder.error)} Você pode tentar novamente: o pedido não será duplicado.</Alert>}
             <Card className="gap-2 p-5 text-sm">
               <p><span className="text-text-secondary">Colecionador:</span> {form.displayName} (@{form.username}) · {form.email}</p>
               <p><span className="text-text-secondary">Rede:</span> {network}</p>
@@ -196,8 +201,8 @@ export function CheckoutPage() {
             </Card>
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep('form')} disabled={createOrder.isPending}>Editar dados</Button>
-              <Button size="lg" disabled={createOrder.isPending || !!stale} onClick={confirm}>
-                {createOrder.isPending ? 'Enviando pedido…' : notice ? 'Confirmar novamente' : 'Confirmar compra'}
+              <Button size="lg" disabled={createOrder.isPending || quote.stale} onClick={confirm}>
+                {createOrder.isPending ? 'Enviando pedido…' : 'Confirmar compra'}
               </Button>
             </div>
           </section>

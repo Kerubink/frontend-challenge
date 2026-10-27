@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@mswjs/socket.io-binding": "^0.2.0",
     "@radix-ui/react-label": "^2.1.16",
     "@radix-ui/react-separator": "^1.1.16",
     "@radix-ui/react-slot": "^1.4.0",
@@ -27,6 +29,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/router-plugin": "^1.168.42",
     "@types/node": "^26.6.4",
@@ -41,5 +44,10 @@
     "workerDirectory": [
       "public"
     ]
+  },
+  "overrides": {
+    "@mswjs/socket.io-binding": {
+      "msw": "$msw"
+    }
   }
 }
